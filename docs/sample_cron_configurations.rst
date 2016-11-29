@@ -59,7 +59,7 @@ This will run job every 2h plus one run at 6:30.
 Allowing parallels runs
 -----------------------
 
-By deafult parallels runs are not allowed (for security reasons). However if you
+By default parallels runs are not allowed (for security reasons). However if you
 want enable them just add:
 
 .. code-block:: python
@@ -81,7 +81,7 @@ If you wish to override which cache is used, put this in your settings file:
 FailedRunsNotificationCronJob
 -----------------------------
 
-This example cron check last cron jobs results. If they were unsuccessfull 10 times in row, it sends email to user.
+This example cron check last cron jobs results. If they were unsuccessful 10 times in row, it sends email to user.
 
 Install required dependencies: ``Django>=1.7.0``, ``django-common>=0.5.1``.
 
