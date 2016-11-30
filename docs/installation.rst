@@ -58,7 +58,12 @@ Installation
         # run all crons, immediately, regardless of run time
         $ python manage.py runcrons --force
 
-  III. run without any messages to the console ``python manage.py runcrons --silent``, for example: ::
+  III. perform a dry-run with ``python manage.py runcrons --dry-run``, for example: ::
+
+        # just report which crons would run, don't actually do anything
+        $ python manage.py runcrons --dry-run
+
+  IIII. run without any messages to the console ``python manage.py runcrons --silent``, for example: ::
 
         # run crons, if required, without message to console
         $ python manage.py runcrons --silent
