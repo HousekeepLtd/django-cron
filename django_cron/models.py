@@ -11,6 +11,7 @@ class CronJobLog(models.Model):
     start_time = models.DateTimeField(db_index=True)
     end_time = models.DateTimeField(db_index=True)
     is_success = models.BooleanField(default=False)
+    failure_reported = models.BooleanField(default=False)
     message = models.TextField(default='', blank=True)  # TODO: db_index=True
 
     # This field is used to mark jobs executed in exact time.

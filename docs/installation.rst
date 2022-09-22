@@ -38,7 +38,7 @@ Installation
            # ...
        ]
 
-6. Now everytime you run the management command ``python manage.py runcrons`` all the crons will run if required. Depending on the application the management command can be called from the Unix crontab as often as required. Every 5 minutes usually works for most of my applications, for example: ::
+6. Now every time you run the management command ``python manage.py runcrons`` all the crons will run if required. Depending on the application the management command can be called from the Unix crontab as often as required. Every 5 minutes usually works for most of my applications, for example: ::
 
        > crontab -e
        */5 * * * * source /home/ubuntu/.bashrc && source /home/ubuntu/work/your-project/bin/activate && python /home/ubuntu/work/your-project/src/manage.py runcrons > /home/ubuntu/cronjob.log

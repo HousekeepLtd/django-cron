@@ -15,6 +15,7 @@ from django.test.client import Client
 from django.urls import reverse
 from django.contrib.auth.models import User
 
+from django_cron.cron import FailedRunsNotificationCronJob
 from django_cron.helpers import humanize_duration
 from django_cron.models import CronJobLog, CronJobLock
 import test_crons
@@ -69,6 +70,7 @@ class TestRunCrons(TransactionTestCase):
     def setUp(self):
         CronJobLog.objects.all().delete()
 
+class BaseTests(DjangoCronTestCase):
     def assertReportedRun(self, job_cls, response):
         expected_log = u"[\N{HEAVY CHECK MARK}] {0}".format(job_cls.code)
         self.assertIn(expected_log, response)
@@ -370,3 +372,110 @@ class TestCronLoop(TransactionTestCase):
             cron_classes=[self.success_cron, self.success_cron], repeat=2, sleep=1
         )
         self.assertEqual(CronJobLog.objects.all().count(), 4)
+
+
+class FailureReportTests(DjangoCronTestCase):
+    """
+    Unit tests for the FailedRunsNotificationCronJob.
+    """
+    def _error_cron(self):
+        call(self.error_cron, force=True)
+
+    def _report_cron(self):
+        call(self.test_failed_runs_notification_cron, force=True)
+
+    def _error_and_report(self):
+        self._error_cron()
+        self._report_cron()
+
+    def _resolve_reported_failures(self, cron_cls, failed_jobs):
+        """
+        Resolve the failed jobs passed to the notifier's report_failure().
+
+        This allows us to assert the jobs passed given that failed jobs is a
+        queryset which shouldn't match any instances after the notifier runs
+        as it should make all log entries as having been reported.
+        """
+        self.reported_cls = cron_cls
+        self.reported_jobs = set(failed_jobs)
+
+    @patch.object(FailedRunsNotificationCronJob, 'report_failure')
+    def test_failed_notifications(self, mock_report):
+        """
+        By default, the user should be notified after 10 job failures.
+        """
+        mock_report.side_effect = self._resolve_reported_failures
+
+        for _ in range(9):
+            self._error_and_report()
+            self.assertEquals(0, mock_report.call_count)
+
+        # The tenth error triggers the report
+        self._error_and_report()
+        self.assertEqual(1, mock_report.call_count)
+
+        # The correct job class and entries should be included
+        self.assertEquals(test_crons.TestErrorCronJob, self.reported_cls)
+        error_logs = CronJobLog.objects.filter(
+            code=test_crons.TestErrorCronJob.code
+        )
+        self.assertEquals(set(error_logs), self.reported_jobs)
+
+    @patch.object(FailedRunsNotificationCronJob, 'report_failure')
+    @override_settings(CRON_MIN_NUM_FAILURES=1)
+    def test_settings_can_override_number_of_failures(self, mock_report):
+        mock_report.side_effect = self._resolve_reported_failures
+        self._error_and_report()
+        self.assertEqual(1, mock_report.call_count)
+
+    @patch.object(FailedRunsNotificationCronJob, 'report_failure')
+    @override_settings(CRON_MIN_NUM_FAILURES=1)
+    def test_logs_all_unreported(self, mock_report):
+        mock_report.side_effect = self._resolve_reported_failures
+        self._error_cron()
+        self._error_and_report()
+        self.assertEqual(1, mock_report.call_count)
+        self.assertEqual(2, len(self.reported_jobs))
+
+    @patch.object(FailedRunsNotificationCronJob, 'report_failure')
+    @override_settings(CRON_MIN_NUM_FAILURES=1)
+    def test_only_logs_failures(self, mock_report):
+        mock_report.side_effect = self._resolve_reported_failures
+        call(self.success_cron, force=True)
+        self._error_and_report()
+        self.assertEqual(
+            self.reported_jobs,
+            {CronJobLog.objects.get(code=test_crons.TestErrorCronJob.code)}
+        )
+
+    @patch.object(FailedRunsNotificationCronJob, 'report_failure')
+    @override_settings(CRON_MIN_NUM_FAILURES=1)
+    def test_only_reported_once(self, mock_report):
+        mock_report.side_effect = self._resolve_reported_failures
+        self._error_and_report()
+        self.assertEqual(1, mock_report.call_count)
+
+        # Calling the notifier for a second time doesn't report a second time
+        self._report_cron()
+        self.assertEqual(1, mock_report.call_count)
+
+    @patch('django_cron.cron.send_mail')
+    @override_settings(
+        CRON_MIN_NUM_FAILURES=1,
+        CRON_FAILURE_FROM_EMAIL='from@email.com',
+        CRON_FAILURE_EMAIL_RECIPIENTS=['foo@bar.com', 'x@y.com'],
+        FAILED_RUNS_CRONJOB_EMAIL_PREFIX='ERROR!!!'
+    )
+    def test_uses_send_mail(self, mock_send_mail):
+        """
+        Test that django_common is used to send the email notifications.
+        """
+        self._error_and_report()
+        self.assertEquals(1, mock_send_mail.call_count)
+        kwargs = mock_send_mail.call_args[1]
+
+        self.assertIn('ERROR!!!', kwargs['subject'])
+        self.assertEquals('from@email.com', kwargs['from_email'])
+        self.assertEquals(
+            ['foo@bar.com', 'x@y.com'], kwargs['recipient_emails']
+        )
