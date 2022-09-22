@@ -48,7 +48,8 @@ def call(command, *args, **kwargs):
     return out_buffer.str_content()
 
 
-class TestRunCrons(TransactionTestCase):
+class BaseTests(TransactionTestCase):
+
     success_cron = 'test_crons.TestSuccessCronJob'
     error_cron = 'test_crons.TestErrorCronJob'
     five_mins_cron = 'test_crons.Test5minsCronJob'
@@ -70,7 +71,6 @@ class TestRunCrons(TransactionTestCase):
     def setUp(self):
         CronJobLog.objects.all().delete()
 
-class BaseTests(DjangoCronTestCase):
     def assertReportedRun(self, job_cls, response):
         expected_log = u"[\N{HEAVY CHECK MARK}] {0}".format(job_cls.code)
         self.assertIn(expected_log, response)
@@ -82,6 +82,9 @@ class BaseTests(DjangoCronTestCase):
     def assertReportedFail(self, job_cls, response):
         expected_log = u"[\N{HEAVY BALLOT X}] {0}".format(job_cls.code)
         self.assertIn(expected_log, response)
+
+
+class TestRunCrons(BaseTests):
 
     def test_success_cron(self):
         self._call(self.success_cron, force=True)
@@ -374,15 +377,15 @@ class TestCronLoop(TransactionTestCase):
         self.assertEqual(CronJobLog.objects.all().count(), 4)
 
 
-class FailureReportTests(DjangoCronTestCase):
+class FailureReportTests(BaseTests):
     """
     Unit tests for the FailedRunsNotificationCronJob.
     """
     def _error_cron(self):
-        call(self.error_cron, force=True)
+        self._call(self.error_cron, force=True)
 
     def _report_cron(self):
-        call(self.test_failed_runs_notification_cron, force=True)
+        self._call(self.test_failed_runs_notification_cron, force=True)
 
     def _error_and_report(self):
         self._error_cron()
@@ -441,7 +444,7 @@ class FailureReportTests(DjangoCronTestCase):
     @override_settings(CRON_MIN_NUM_FAILURES=1)
     def test_only_logs_failures(self, mock_report):
         mock_report.side_effect = self._resolve_reported_failures
-        call(self.success_cron, force=True)
+        self._call(self.success_cron, force=True)
         self._error_and_report()
         self.assertEqual(
             self.reported_jobs,
