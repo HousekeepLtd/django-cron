@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_cron', '0002_remove_max_length_from_CronJobLog_message'),
+        ('django_cron', '0003_cronjoblog_failure_reported'),
     ]
 
     operations = [
