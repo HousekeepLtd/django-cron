@@ -1,5 +1,10 @@
 Changelog
 =========
+0.6.1-HK
+------
+    - Update requirements to Django >=2.2, <4 (2 and 3 compatibility)
+    - Merge migrations for database locks and reporting
+
 0.6.0
 ------
 
