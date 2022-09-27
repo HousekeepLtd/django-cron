@@ -162,7 +162,7 @@ is set to run on each ``runcrons`` task, and the default process is to email
 all the users specified in the ``ADMINS`` settings list when a job fails more
 than 10 times in a row.
 
-Install required dependencies: ``Django>=3.2.0``.
+Install required dependencies: ``Django>=2.2.0,<4``.
 
 Add ``django_cron.cron.FailedRunsNotificationCronJob`` to *the end* of your
 ``CRON_CLASSES`` list within your settings file. ::
