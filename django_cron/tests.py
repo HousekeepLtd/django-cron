@@ -480,5 +480,5 @@ class FailureReportTests(BaseTests):
         self.assertIn('ERROR!!!', kwargs['subject'])
         self.assertEquals('from@email.com', kwargs['from_email'])
         self.assertEquals(
-            ['foo@bar.com', 'x@y.com'], kwargs['recipient_emails']
+            ['foo@bar.com', 'x@y.com'], kwargs['recipient_list']
         )
