@@ -3,34 +3,16 @@ os: linux
 language: python
 jobs:
   include:
-    - python: "2.7"
-      env: DJANGO=1.11.* DJANGO_SETTINGS_MODULE='settings_sqllite'
-    - python: "2.7"
-      env: DJANGO=1.11.* DJANGO_SETTINGS_MODULE='settings_postgres'
+    - python: "3.8"
+      env: DJANGO=3.2.* DJANGO_SETTINGS_MODULE='settings_sqllite'
+    - python: "3.8"
+      env: DJANGO=3.2.* DJANGO_SETTINGS_MODULE='settings_postgres'
       services:
         - postgresql
       before_script:
         - psql -c 'create database travis_test;' -U postgres
-    - python: "2.7"
-      env: DJANGO=1.11.* DJANGO_SETTINGS_MODULE='settings_mysql'
-      services:
-        - mysql
-      before_script:
-        - mysql -e 'create database travis_test;'
-    - python: "3.7"
-      env: DJANGO=1.11.* DJANGO_SETTINGS_MODULE='settings_sqllite'
-    - python: "3.7"
-      env: DJANGO=2.0.* DJANGO_SETTINGS_MODULE='settings_sqllite'
-    - python: "3.7"
-      env: DJANGO=3.0.* DJANGO_SETTINGS_MODULE='settings_sqllite'
-    - python: "3.7"
-      env: DJANGO=3.0.* DJANGO_SETTINGS_MODULE='settings_postgres'
-      services:
-        - postgresql
-      before_script:
-        - psql -c 'create database travis_test;' -U postgres
-    - python: "3.7"
-      env: DJANGO=3.0.* DJANGO_SETTINGS_MODULE='settings_mysql'
+    - python: "3.8"
+      env: DJANGO=3.2.* DJANGO_SETTINGS_MODULE='settings_mysql'
       services:
         - mysql
       before_script:
