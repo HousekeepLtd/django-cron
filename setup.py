@@ -20,7 +20,7 @@ f.close()
 
 setup(
     name='django-cron',
-    version='0.6.1a1',
+    version='0.7.1a1',
     author='Sumit Chachra',
     author_email='chachra@tivix.com',
     url='http://github.com/tivix/django-cron',
@@ -29,7 +29,7 @@ setup(
     long_description=long_description,
     keywords='django cron',
     zip_safe=False,
-    install_requires=['Django>=2.2,<4', 'django-common-helpers>=0.6.4'],
+    install_requires=['Django>=3.2,<5', 'django-common-helpers>=0.6.4'],
     test_suite='runtests.runtests',
     include_package_data=True,
     classifiers=[
