@@ -3,8 +3,8 @@ import threading
 from time import sleep
 from datetime import timedelta
 from unittest import skip
+from unittest.mock import patch
 
-from mock import patch
 from freezegun import freeze_time
 
 from django import db
@@ -411,18 +411,18 @@ class FailureReportTests(BaseTests):
 
         for _ in range(9):
             self._error_and_report()
-            self.assertEquals(0, mock_report.call_count)
+            self.assertEqual(0, mock_report.call_count)
 
         # The tenth error triggers the report
         self._error_and_report()
         self.assertEqual(1, mock_report.call_count)
 
         # The correct job class and entries should be included
-        self.assertEquals(test_crons.TestErrorCronJob, self.reported_cls)
+        self.assertEqual(test_crons.TestErrorCronJob, self.reported_cls)
         error_logs = CronJobLog.objects.filter(
             code=test_crons.TestErrorCronJob.code
         )
-        self.assertEquals(set(error_logs), self.reported_jobs)
+        self.assertEqual(set(error_logs), self.reported_jobs)
 
     @patch.object(FailedRunsNotificationCronJob, 'report_failure')
     @override_settings(CRON_MIN_NUM_FAILURES=1)
@@ -474,11 +474,11 @@ class FailureReportTests(BaseTests):
         Test that django_common is used to send the email notifications.
         """
         self._error_and_report()
-        self.assertEquals(1, mock_send_mail.call_count)
+        self.assertEqual(1, mock_send_mail.call_count)
         kwargs = mock_send_mail.call_args[1]
 
         self.assertIn('ERROR!!!', kwargs['subject'])
-        self.assertEquals('from@email.com', kwargs['from_email'])
-        self.assertEquals(
+        self.assertEqual('from@email.com', kwargs['from_email'])
+        self.assertEqual(
             ['foo@bar.com', 'x@y.com'], kwargs['recipient_list']
         )
