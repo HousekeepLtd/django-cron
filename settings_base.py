@@ -13,6 +13,10 @@ INSTALLED_APPS = [
 
 SECRET_KEY = "wknfgl34qtnjo&Yk3jqfjtn2k3jtnk4wtnk"
 
+# Explicit because Django's own default flipped from False to True in 5.0,
+# and django_cron/tests.py asserts against naive datetimes.
+USE_TZ = False
+
 
 CRON_CLASSES = [
     'test_crons.TestSuccessCronJob',
