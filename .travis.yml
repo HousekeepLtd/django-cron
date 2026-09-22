@@ -23,6 +23,6 @@ install:
   - pip install -r test_requirements.txt
 script:
   - flake8 . --config=flake8
-  - coverage run --source=django_cron setup.py test
+  - coverage run --source=django_cron runtests.py runtests
 after_success:
   - coveralls
