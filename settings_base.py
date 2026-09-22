@@ -13,7 +13,6 @@ INSTALLED_APPS = [
 
 SECRET_KEY = "wknfgl34qtnjo&Yk3jqfjtn2k3jtnk4wtnk"
 
-# Explicit because Django's own default flipped from False to True in 5.0.
 USE_TZ = True
 TIME_ZONE = 'UTC'
 
